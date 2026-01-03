@@ -5,10 +5,10 @@
   snakePosX db 10
   snakePosY db 20
   exitFlag db 0
-  boardStartX db 5
-  boardStartY db 5
-  boardWidth dw 40
-  boardHeight dw 40
+  boardStartX db 15
+  boardStartY db 10
+  boardWidth db 40
+  boardHeight db 40
   snakeDirection db DIRECTION_EAST
 
   ;keys
@@ -32,7 +32,9 @@ endm
 
 PrintHorizontalWall macro
   local @@agn
-  mov cx,boardWidth
+  mov ch,0
+  mov cl,boardWidth
+  inc cl
   @@agn:
     mov ah,02h
     mov dl,'='
@@ -41,11 +43,15 @@ PrintHorizontalWall macro
 endm
 
 MoveCursor macro x, y
+  push ax
+  push dx
   mov dh,y
   mov dl,x
   mov bh,0h
   mov ah,02h
   int 10h
+  pop dx
+  pop ax
 endm
 
 PrintSnakeHead macro
@@ -61,39 +67,42 @@ Sleep macro
 endm
 
 PrintChar macro c
+  push ax
   mov ah,02h
   mov dl,c
   int 21h
+  pop ax
 endm
 
 PrintBoard macro
+  push ax
+  push cx
+
   MoveCursor boardStartX,boardStartY
   PrintHorizontalWall
 
-  MoveCursor boardStartX,[boardStartY+1]
-  mov cx,boardHeight
+  mov ah,boardStartX
+  mov al,boardStartY
+  mov ch,0
+  mov cl,boardHeight
   PrintWalls:
-    mov ah,02h
-    mov dl,'='
-    int 21h
-
-    push cx
-    mov cx,boardHeight
-    PrintSpaceBetweenWalls:
-      mov ah,02h
-      mov dl,' '
-      int 21h
-    loop PrintSpaceBetweenWalls
-    pop cx
-
-    mov ah,02h
-    mov dl,'='
-    int 21h
-
-    PrintNewLine
+    inc al
+    MoveCursor ah,al
+    PrintChar '|'
+    push ax
+    add ah,40
+    MoveCursor ah,al
+    pop ax
+    PrintChar '|'
   loop PrintWalls
 
+  mov al,boardStartY
+  add al,40
+  MoveCursor boardStartX,al
   PrintHorizontalWall
+
+  pop cx
+  pop ax
 endm
 
 MoveSnakeHead macro
@@ -247,17 +256,23 @@ HandleInput proc
 HandleInput endp
 
 IsTouchingWall Proc
-  cmp snakePosX,0
+  mov al,boardStartX
+  cmp snakePosX,al
   je WallIsTouched
 
-  cmp snakePosY,0
+  mov al,boardStartY
+  cmp snakePosY,al
   je WallIsTouched
 
-  mov ax,boardWidth
+  mov ah,0
+  mov al,boardStartX
+  add al,boardWidth
   cmp snakePosX,al
   jge WallIsTouched
 
-  mov ax,boardHeight
+  mov ah,0
+  mov al,boardStartY
+  add al,boardHeight
   cmp snakePosY,al
   jge WallIsTouched
 
@@ -271,12 +286,20 @@ IsTouchingWall Proc
 IsTouchingWall endp
 
 main proc
-
   mov ax,@DATA
   mov ds,ax
   HideCursor
   call CLS
   PrintBoard
+
+  mov al,boardStartX
+  add al,2
+  mov [snakePosX],al
+
+  mov al,boardHeight
+  shr al,1
+  add al,boardStartY
+  mov [snakePosY],al
 
   GameLoop:
     PrintSnakeHead
