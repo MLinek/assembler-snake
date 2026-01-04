@@ -61,11 +61,6 @@ PrintSnakeHead macro
   int 21h
 endm
 
-Sleep macro
-  mov ah, 29h
-  int 21h
-endm
-
 PrintChar macro c
   push ax
   mov ah,02h
