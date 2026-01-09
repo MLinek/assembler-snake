@@ -30,18 +30,6 @@ PrintNewLine macro
   int 21h
 endm
 
-PrintHorizontalWall macro
-  local @@agn
-  mov ch,0
-  mov cl,boardWidth
-  inc cl
-  @@agn:
-    mov ah,02h
-    mov dl,'='
-    int 21h
-  loop @@agn
-endm
-
 MoveCursor macro x, y
   push ax
   push dx
@@ -123,12 +111,24 @@ endm
 
 .code
 
+PrintHorizontalWall proc
+  mov ch,0
+  mov cl,boardWidth
+  inc cl
+  agn:
+    mov ah,02h
+    mov dl,'='
+    int 21h
+  loop agn
+  ret
+PrintHorizontalWall endp
+
 PrintBoard proc
   push ax
   push cx
 
   MoveCursor boardStartX,boardStartY
-  PrintHorizontalWall
+  call PrintHorizontalWall
 
   mov ah,boardStartX
   mov al,boardStartY
@@ -148,7 +148,7 @@ PrintBoard proc
   mov al,boardStartY
   add al,boardHeight
   MoveCursor boardStartX,al
-  PrintHorizontalWall
+  call PrintHorizontalWall
 
   pop cx
   pop ax
