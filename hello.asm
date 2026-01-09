@@ -36,17 +36,12 @@ MoveCursor macro x, y
   pop ax
 endm
 
-PrintChar macro c
-  push ax
-  mov ah,02h
-  mov dl,c
-  int 21h
-  pop ax
-endm
-
 MoveSnakeHead macro
   MoveCursor snakePosX, snakePosY
-  PrintChar ' '
+  push ax
+  mov al,' '
+  call PrintChar
+  pop ax
   mov al,[snakeDirection]
 
   cmp al,DIRECTION_EAST
@@ -92,6 +87,13 @@ endm
 
 .code
 
+PrintChar proc
+  mov ah,02h
+  mov dl,al
+  int 21h
+  ret
+PrintChar endp
+
 PrintSnakeHead proc
   MoveCursor snakePosX, snakePosY
   mov ah,02h
@@ -133,12 +135,18 @@ PrintBoard proc
   PrintWalls:
     inc al
     MoveCursor ah,al
-    PrintChar '|'
+    push ax
+    mov al,'|'
+    call PrintChar
+    pop ax
     push ax
     add ah,boardWidth
     MoveCursor ah,al
     pop ax
-    PrintChar '|'
+    push ax
+    mov al,'|'
+    call PrintChar
+    pop ax
   loop PrintWalls
 
   mov al,boardStartY
