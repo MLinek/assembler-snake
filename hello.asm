@@ -103,13 +103,14 @@ MoveSnakeHead macro
   moveSnakeEnd:
 endm
 
-HideCursor macro
+.code
+
+HideCursor proc
   mov ah,01
   mov ch,32
   int 10h
-endm
-
-.code
+  ret
+HideCursor endp
 
 PrintHorizontalWall proc
   mov ch,0
@@ -274,7 +275,7 @@ IsTouchingWall endp
 main proc
   mov ax,@DATA
   mov ds,ax
-  HideCursor
+  call HideCursor
   call CLS
   call PrintBoard
 
