@@ -1,7 +1,6 @@
 .model small
 .stack 1000h
 .data
-  newline db 0dh, 0ah, '$'
   snakePosX db 10
   snakePosY db 20
   exitFlag db 0
@@ -24,11 +23,6 @@
   DIRECTION_SOUTH EQU 2
   DIRECTION_WEST EQU 3
 
-PrintNewLine macro
-  mov ah,09h
-  mov dx,offset newline
-  int 21h
-endm
 
 MoveCursor macro x, y
   push ax
@@ -40,13 +34,6 @@ MoveCursor macro x, y
   int 10h
   pop dx
   pop ax
-endm
-
-PrintSnakeHead macro
-  MoveCursor snakePosX, snakePosY
-  mov ah,02h
-  mov dl,'@'
-  int 21h
 endm
 
 PrintChar macro c
@@ -104,6 +91,14 @@ MoveSnakeHead macro
 endm
 
 .code
+
+PrintSnakeHead proc
+  MoveCursor snakePosX, snakePosY
+  mov ah,02h
+  mov dl,'@'
+  int 21h
+  ret
+PrintSnakeHead endp
 
 HideCursor proc
   mov ah,01
@@ -289,7 +284,7 @@ main proc
   mov [snakePosY],al
 
   GameLoop:
-    PrintSnakeHead
+    call PrintSnakeHead
     call IsTouchingWall
     cmp al,1
     je Death
