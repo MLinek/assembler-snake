@@ -85,14 +85,14 @@ PrintBoard macro
     MoveCursor ah,al
     PrintChar '|'
     push ax
-    add ah,40
+    add ah,boardWidth
     MoveCursor ah,al
     pop ax
     PrintChar '|'
   loop PrintWalls
 
   mov al,boardStartY
-  add al,40
+  add al,boardHeight
   MoveCursor boardStartX,al
   PrintHorizontalWall
 
