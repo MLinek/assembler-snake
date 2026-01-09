@@ -69,37 +69,6 @@ PrintChar macro c
   pop ax
 endm
 
-PrintBoard macro
-  push ax
-  push cx
-
-  MoveCursor boardStartX,boardStartY
-  PrintHorizontalWall
-
-  mov ah,boardStartX
-  mov al,boardStartY
-  mov ch,0
-  mov cl,boardHeight
-  PrintWalls:
-    inc al
-    MoveCursor ah,al
-    PrintChar '|'
-    push ax
-    add ah,boardWidth
-    MoveCursor ah,al
-    pop ax
-    PrintChar '|'
-  loop PrintWalls
-
-  mov al,boardStartY
-  add al,boardHeight
-  MoveCursor boardStartX,al
-  PrintHorizontalWall
-
-  pop cx
-  pop ax
-endm
-
 MoveSnakeHead macro
   MoveCursor snakePosX, snakePosY
   PrintChar ' '
@@ -154,15 +123,37 @@ endm
 
 .code
 
-ExecuteIfEqual proc var, val, procName
-  mov ax,[var]
-  cmp ax,val
-  jne ExecuteIfEqualEnd
-  call procName
+PrintBoard proc
+  push ax
+  push cx
 
-  ExecuteIfEqualEnd:
+  MoveCursor boardStartX,boardStartY
+  PrintHorizontalWall
+
+  mov ah,boardStartX
+  mov al,boardStartY
+  mov ch,0
+  mov cl,boardHeight
+  PrintWalls:
+    inc al
+    MoveCursor ah,al
+    PrintChar '|'
+    push ax
+    add ah,boardWidth
+    MoveCursor ah,al
+    pop ax
+    PrintChar '|'
+  loop PrintWalls
+
+  mov al,boardStartY
+  add al,boardHeight
+  MoveCursor boardStartX,al
+  PrintHorizontalWall
+
+  pop cx
+  pop ax
   ret
-endp
+PrintBoard endp
 
 Sleep2 proc ms
   ; Convert milliseconds to microseconds
@@ -285,7 +276,7 @@ main proc
   mov ds,ax
   HideCursor
   call CLS
-  PrintBoard
+  call PrintBoard
 
   mov al,boardStartX
   add al,2
