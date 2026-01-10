@@ -23,21 +23,10 @@
   DIRECTION_SOUTH EQU 2
   DIRECTION_WEST EQU 3
 
-
-MoveCursor macro x, y
-  push ax
-  push dx
-  mov dh,y
-  mov dl,x
-  mov bh,0h
-  mov ah,02h
-  int 10h
-  pop dx
-  pop ax
-endm
-
 MoveSnakeHead macro
-  MoveCursor snakePosX, snakePosY
+  mov ah,snakePosX
+  mov al,snakePosY
+  call MoveCursor
   push ax
   mov al,' '
   call PrintChar
@@ -95,7 +84,9 @@ PrintChar proc
 PrintChar endp
 
 PrintSnakeHead proc
-  MoveCursor snakePosX, snakePosY
+  mov ah,snakePosX
+  mov al,snakePosY
+  call MoveCursor
   mov ah,02h
   mov dl,'@'
   int 21h
@@ -110,6 +101,8 @@ HideCursor proc
 HideCursor endp
 
 PrintHorizontalWall proc
+  push ax
+  push dx
   mov ch,0
   mov cl,boardWidth
   inc cl
@@ -118,40 +111,57 @@ PrintHorizontalWall proc
     mov dl,'='
     int 21h
   loop agn
+  pop ax
+  pop dx
   ret
 PrintHorizontalWall endp
+
+
+MoveCursor proc
+  push dx
+  mov dh,al
+  mov dl,ah
+  mov bh,0h
+  mov ah,02h
+  int 10h
+  pop dx
+  ret
+MoveCursor endp
 
 PrintBoard proc
   push ax
   push cx
-
-  MoveCursor boardStartX,boardStartY
+  
+  mov ah,boardStartX
+  mov al,boardStartY
+  call MoveCursor
   call PrintHorizontalWall
-
+  
   mov ah,boardStartX
   mov al,boardStartY
   mov ch,0
   mov cl,boardHeight
   PrintWalls:
     inc al
-    MoveCursor ah,al
+    mov ah,boardStartX
+    call MoveCursor
     push ax
     mov al,'|'
     call PrintChar
     pop ax
-    push ax
+    mov ah,boardStartX
     add ah,boardWidth
-    MoveCursor ah,al
-    pop ax
+    call MoveCursor
     push ax
     mov al,'|'
     call PrintChar
     pop ax
   loop PrintWalls
-
+  
+  mov ah, boardStartX
   mov al,boardStartY
   add al,boardHeight
-  MoveCursor boardStartX,al
+  call MoveCursor
   call PrintHorizontalWall
 
   pop cx
